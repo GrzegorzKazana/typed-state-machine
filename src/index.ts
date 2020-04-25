@@ -1,9 +1,7 @@
 type AllowedStates = 'idle' | 'pending' | 'fetched' | 'failed';
 type PossibleState<Keys extends string> = { [K in Keys]: unknown };
 type PossibleTransitions<Keys extends string> = {
-    [K in Keys]: {
-        [L in Keys]?: unknown;
-    };
+    [K in Keys]: readonly Keys[];
 };
 
 const firstState = { a: 0 };
@@ -23,58 +21,68 @@ type PossibleStates = {
 };
 
 const transitions = {
-    idle: { pending: {} },
-    pending: { fetched: {}, failed: {} },
-    fetched: { idle: {}, fetched: {} },
-    failed: { pending: {} },
+    idle: ['pending'],
+    pending: ['fetched', 'failed'],
+    fetched: ['idle', 'fetched'],
+    failed: ['pending'],
 } as const;
+type TransitionMatrix = typeof transitions;
 
 type Machine<
-    CurrentKey extends AllowedStates,
-    PossibleNextKeys extends AllowedStates,
-    TransitionMatrix extends PossibleTransitions<AllowedStates>,
-    StateMatrix extends PossibleState<AllowedStates>
+    AllowedStateKeys extends string,
+    StateMatrix extends PossibleState<AllowedStateKeys>,
+    CurrentKey extends AllowedStateKeys,
+    PossibleNextKeys extends AllowedStateKeys,
+    TransitionMatrix extends PossibleTransitions<AllowedStateKeys>
 > = {
-    value: PossibleStates[CurrentKey];
+    value: StateMatrix[CurrentKey];
 } & {
-    [NextPossibleKey in keyof TransitionMatrix[CurrentKey]]: (
+    [NextPossibleKey in TransitionMatrix[CurrentKey][number]]: (
         nextState: StateMatrix[NextPossibleKey],
     ) => Machine<
-        // @ts-ignore :(
-        // for some reason ts cannot properly infer that
-        // keyof TransitionMatrix[CurrentKey] extends AllowedStates
-        // as it is clearly defined in PossibleTransitions<AllowedStates>
+        AllowedStateKeys,
+        StateMatrix,
         NextPossibleKey,
         PossibleNextKeys,
-        TransitionMatrix,
-        StateMatrix
+        TransitionMatrix
     >;
 };
 
 function machine<
-    CurrentKey extends AllowedStates,
-    PossibleNextKeys extends AllowedStates,
-    TransitionMatrix extends PossibleTransitions<AllowedStates>,
-    StateMatrix extends PossibleState<AllowedStates> = PossibleStates
+    AllowedStateKeys extends string,
+    StateMatrix extends PossibleState<AllowedStateKeys>,
+    TransitionMatrix extends PossibleTransitions<AllowedStateKeys>
+>(
+    transitions: TransitionMatrix,
+): <
+    CurrentKey extends AllowedStateKeys,
+    PossibleNextKeys extends AllowedStateKeys
 >(
     initStateKey: CurrentKey,
     initState: StateMatrix[CurrentKey],
-    transitions: TransitionMatrix,
-): Machine<CurrentKey, PossibleNextKeys, TransitionMatrix, StateMatrix> {
-    const transitionsInCurState = transitions[initStateKey];
-    const asd = (transitionsInCurState
-        ? Object.keys(transitionsInCurState)
-        : []) as PossibleNextKeys[];
+) => Machine<
+    AllowedStateKeys,
+    StateMatrix,
+    CurrentKey,
+    PossibleNextKeys,
+    TransitionMatrix
+> {
+    return (initStateKey, initState) => {
+        const transitionsInCurState = transitions[initStateKey];
 
-    return {
-        value: initState,
-        ...Object.assign(
-            {},
-            ...asd.map(k => ({
-                [k]: (n: StateMatrix[typeof k]) => machine(k, n, transitions),
-            })),
-        ),
+        return {
+            value: initState,
+            ...Object.assign(
+                {},
+                ...transitionsInCurState.map(k => ({
+                    [k]: (n: StateMatrix[typeof k]) =>
+                        machine(transitions)(k, n),
+                })),
+            ),
+        };
     };
 }
 
-const a = machine('idle', { a: 1 }, transitions);
+const a = machine<AllowedStates, PossibleStates, TransitionMatrix>(
+    transitions,
+)('idle', { a: 1 });
