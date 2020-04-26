@@ -8,13 +8,31 @@ type StateHandlers<
     [K in AllowedStateKeys]?: (state: StateMatrix[K]) => any;
 };
 
+type TransitionObject<
+    AllowedStateKeys extends string,
+    StateMatrix extends PossibleState<AllowedStateKeys>,
+    TransitionMatrix extends PossibleTransitions<AllowedStateKeys>,
+    TransitionTarget extends AllowedStateKeys
+> = { [L in TransitionMatrix[TransitionTarget][number]]: (newState: StateMatrix[L]) => void };
+
+type TransitionRequestHandlers<
+    AllowedStateKeys extends string,
+    StateMatrix extends PossibleState<AllowedStateKeys>,
+    TransitionMatrix extends PossibleTransitions<AllowedStateKeys>
+> = {
+    [K in AllowedStateKeys]?: (
+        transitionObj: TransitionObject<AllowedStateKeys, StateMatrix, TransitionMatrix, K>,
+    ) => void;
+};
+
 type TransitionHandlers<
     AllowedStateKeys extends string,
     StateMatrix extends PossibleState<AllowedStateKeys>,
     TransitionMatrix extends PossibleTransitions<AllowedStateKeys>
 > = {
     [K in AllowedStateKeys]?: (
-        transitionObj: { [L in TransitionMatrix[K][number]]: (newState: StateMatrix[L]) => void },
+        newState: StateMatrix[K],
+        transitionObj: TransitionObject<AllowedStateKeys, StateMatrix, TransitionMatrix, K>,
     ) => void;
 };
 
@@ -25,16 +43,23 @@ type StatefulMachine<
 > = {
     value: StateMatrix[AllowedStateKeys];
     state: AllowedStateKeys;
-    transitions: TransitionMatrix;
+    possibleTransitions: TransitionMatrix;
+    transitionHandlers: TransitionHandlers<AllowedStateKeys, StateMatrix, TransitionMatrix>;
 } & {
-    isInState(state: AllowedStateKeys): boolean;
-    canTransitionTo(state: AllowedStateKeys): boolean;
-    fold<H extends StateHandlers<AllowedStateKeys, StateMatrix>>(
+    isInState(stateKey: AllowedStateKeys): boolean;
+    canTransitionTo(stateKey: AllowedStateKeys): boolean;
+    setState<K extends AllowedStateKeys>(stateKey: K, state: StateMatrix[K]): void;
+    fold<H extends StateHandlers<AllowedStateKeys, StateMatrix>, D>(
         handlers: H,
-    ): AllowedStateKeys extends keyof H ? MapReturnTypeUnion<H> : MapReturnTypeUnion<H> | undefined;
-    transition<H extends TransitionHandlers<AllowedStateKeys, StateMatrix, TransitionMatrix>>(
+        defaultVal?: D,
+    ): AllowedStateKeys extends keyof H ? MapReturnTypeUnion<H> : MapReturnTypeUnion<H> | D;
+    // prettier-ignore
+    transition<H extends TransitionRequestHandlers<AllowedStateKeys, StateMatrix, TransitionMatrix>>(
         handlers: H,
     ): void;
+    getTransitionObjForState<K extends AllowedStateKeys>(
+        stateKey: K,
+    ): { [L in TransitionMatrix[K][number]]: (newState: StateMatrix[L]) => void };
 };
 
 export default function createStatefulMachine<
@@ -43,6 +68,7 @@ export default function createStatefulMachine<
     TransitionMatrix extends PossibleTransitions<AllowedStateKeys>
 >(
     transitions: TransitionMatrix,
+    transitionHandlers: TransitionHandlers<AllowedStateKeys, StateMatrix, TransitionMatrix> = {},
 ): <CurrentKey extends AllowedStateKeys>(
     initStateKey: CurrentKey,
     initState: StateMatrix[CurrentKey],
@@ -51,36 +77,36 @@ export default function createStatefulMachine<
         return {
             value: initState,
             state: initStateKey,
-            transitions,
-            isInState(state: AllowedStateKeys): boolean {
-                return this.state === state;
+            possibleTransitions: transitions,
+            transitionHandlers,
+            isInState(stateKey) {
+                return this.state === stateKey;
             },
-            canTransitionTo(state: AllowedStateKeys): boolean {
-                return this.transitions[this.state].includes(state);
+            canTransitionTo(stateKey) {
+                return this.possibleTransitions[this.state].includes(stateKey);
             },
-            transition<
-                H extends TransitionHandlers<AllowedStateKeys, StateMatrix, TransitionMatrix>
-            >(handlers: H) {
-                const currentState = this.state;
-                const methodObjs = this.transitions[currentState].map(newKey => ({
-                    [newKey]: (newState: StateMatrix[typeof newKey]) => {
-                        this.value = newState;
-                        this.state = newKey;
-                    },
-                }));
-                const methodObj = shallowMerge<
-                    {
-                        [L in TransitionMatrix[typeof currentState][number]]: (
-                            newState: StateMatrix[L],
-                        ) => void;
-                    }
-                >(...methodObjs);
-                const currentHandler = handlers[currentState];
-                currentHandler && currentHandler(methodObj);
+            setState(stateKey, newState) {
+                this.value = newState;
+                this.state = stateKey;
+                const handler = this.transitionHandlers[stateKey];
+                handler && handler(newState, this.getTransitionObjForState(stateKey));
             },
-            fold<H extends StateHandlers<AllowedStateKeys, StateMatrix>>(handlers: H) {
+            transition(handlers) {
+                const transitionObject = this.getTransitionObjForState(this.state);
                 const currentHandler = handlers[this.state];
-                return currentHandler ? currentHandler(this.value) : null;
+                currentHandler && currentHandler(transitionObject);
+            },
+            fold(handlers, defaultVal) {
+                const currentHandler = handlers[this.state];
+                return currentHandler ? currentHandler(this.value) : defaultVal;
+            },
+            getTransitionObjForState(currentState) {
+                const methodObjs = this.possibleTransitions[currentState].map(newKey => ({
+                    [newKey]: (newState: StateMatrix[typeof newKey]) =>
+                        this.setState(newKey, newState),
+                }));
+
+                return shallowMerge(...methodObjs);
             },
         };
     };
