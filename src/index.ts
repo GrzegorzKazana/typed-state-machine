@@ -1,6 +1,6 @@
 type PossibleState<Keys extends string> = { [K in Keys]: unknown };
 type PossibleTransitions<Keys extends string> = {
-    [K in Keys]?: readonly Keys[];
+    [K in Keys]: readonly Keys[];
 };
 
 export type Machine<
@@ -23,7 +23,7 @@ export type Machine<
     >;
 };
 
-export default function machine<
+export default function createMachine<
     AllowedStateKeys extends string,
     StateMatrix extends PossibleState<AllowedStateKeys>,
     TransitionMatrix extends PossibleTransitions<AllowedStateKeys>
@@ -45,8 +45,10 @@ export default function machine<
     return (initStateKey, initState) => {
         const transitionsInCurState = transitions[initStateKey];
         const transitionMathodObjs = transitionsInCurState
-            ? transitionsInCurState.map(k => ({
-                  [k]: (n: StateMatrix[typeof k]) => machine(transitions)(k, n),
+            ? transitionsInCurState.map(nextStateKey => ({
+                  [nextStateKey]: (
+                      nextState: StateMatrix[typeof nextStateKey],
+                  ) => createMachine(transitions)(nextStateKey, nextState),
               }))
             : [];
 

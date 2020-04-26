@@ -1,16 +1,6 @@
-import machine from './src/index';
+import createMachine from '@/index';
 
-type AllowedStates = 'idle' | 'pending' | 'fetched' | 'failed';
-const firstState = { a: 0 };
-
-const initialState = {
-    idle: { a: 0 },
-    pending: { b: 1 },
-    fetched: { c: 2 },
-    failed: { d: 3 },
-};
-
-type PossibleStates = {
+type States = {
     idle: { a: number };
     pending: { b: number };
     fetched: { c: number };
@@ -23,8 +13,14 @@ const transitions = {
     fetched: ['idle', 'fetched'],
     failed: ['pending'],
 } as const;
-type TransitionMatrix_ = typeof transitions;
 
-const a = machine<AllowedStates, PossibleStates, TransitionMatrix_>(
+const initMachine = createMachine<keyof States, States, typeof transitions>(
     transitions,
-)('idle', { a: 1 });
+);
+
+const idleMachine = initMachine('idle', { a: 0 });
+// idleMachine.value.a === 0
+const pendingMachine = idleMachine.pending({ b: 1 });
+// pendingMachine.value.b === 1
+const _fetchedMachine = pendingMachine.fetched({ c: 2 });
+// _fetchedMachine.value.c === 2

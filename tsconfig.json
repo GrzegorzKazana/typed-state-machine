@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "UMD",
+        "noImplicitAny": true,
+        "strict": true,
+        "strictNullChecks": true,
+        "declaration": true,
+        "outDir": "./dist",
+        "sourceMap": true,
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["src/*"]
+        },
+        "moduleResolution": "node"
+    },
+    "include": ["src/**/*", "examples/**/*"],
+    "exclude": ["node_modules", "tsconfig.json"]
+}
