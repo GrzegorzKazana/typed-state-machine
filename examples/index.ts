@@ -1,4 +1,4 @@
-import createMachine from '@/index';
+import { stateless } from '@/index';
 
 type States = {
     idle: { a: number };
@@ -14,9 +14,7 @@ const transitions = {
     failed: ['pending'],
 } as const;
 
-const initMachine = createMachine<keyof States, States, typeof transitions>(
-    transitions,
-);
+const initMachine = stateless<keyof States, States, typeof transitions>(transitions);
 
 const idleMachine = initMachine('idle', { a: 0 });
 // idleMachine.value.a === 0

@@ -1,10 +1,8 @@
-import createMachine from '../src/index';
+import { stateless } from '../src/index';
 import { States, transitions } from './mocks';
 
-describe('when creating state machine', () => {
-    const initMachine = createMachine<keyof States, States, typeof transitions>(
-        transitions,
-    );
+describe('when creating stateless state machine', () => {
+    const initMachine = stateless<keyof States, States, typeof transitions>(transitions);
 
     it('correctly applies the first state', () => {
         const idleMachine = initMachine('idle', { a: 1 });
@@ -19,9 +17,7 @@ describe('when creating state machine', () => {
             .map(([key]) => key);
         const expectedTransitions = ['pending'];
 
-        expect(transitionFns).toEqual(
-            expect.arrayContaining(expectedTransitions),
-        );
+        expect(transitionFns).toEqual(expect.arrayContaining(expectedTransitions));
     });
 
     it('correcty transitions for state a to state b', () => {
@@ -39,8 +35,6 @@ describe('when creating state machine', () => {
             .map(([key]) => key);
         const expectedTransitions = ['fetched', 'failed'];
 
-        expect(transitionFns).toEqual(
-            expect.arrayContaining(expectedTransitions),
-        );
+        expect(transitionFns).toEqual(expect.arrayContaining(expectedTransitions));
     });
 });
