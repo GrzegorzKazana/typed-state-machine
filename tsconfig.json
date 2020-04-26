@@ -9,6 +9,7 @@
         "outDir": "./dist",
         "sourceMap": true,
         "baseUrl": ".",
+        "esModuleInterop": true,
         "paths": {
             "@/*": ["src/*"]
         },
