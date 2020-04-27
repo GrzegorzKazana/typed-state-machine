@@ -1,4 +1,10 @@
-import { PossibleState, PossibleTransitions, shallowMerge, MapReturnTypeUnion } from './utils';
+import {
+    PossibleState,
+    PossibleTransitions,
+    shallowMerge,
+    canIndex,
+    SafeReturnType,
+} from './utils';
 
 type StateHandlers<
     AllowedStateKeys extends string,
@@ -15,7 +21,7 @@ type TransitionObject<
     TransitionTarget extends AllowedStateKeys
 > = { [L in TransitionMatrix[TransitionTarget][number]]: (newState: StateMatrix[L]) => void };
 
-type TransitionRequestHandlers<
+type TransitionReqHandlers<
     AllowedStateKeys extends string,
     StateMatrix extends PossibleState<AllowedStateKeys>,
     TransitionMatrix extends PossibleTransitions<AllowedStateKeys>
@@ -49,12 +55,11 @@ type StatefulMachine<
     isInState(stateKey: AllowedStateKeys): boolean;
     canTransitionTo(stateKey: AllowedStateKeys): boolean;
     setState<K extends AllowedStateKeys>(stateKey: K, state: StateMatrix[K]): void;
-    fold<H extends StateHandlers<AllowedStateKeys, StateMatrix>, D>(
+    fold<K extends AllowedStateKeys, H extends StateHandlers<K, StateMatrix>, D = null>(
         handlers: H,
         defaultVal?: D,
-    ): AllowedStateKeys extends keyof H ? MapReturnTypeUnion<H> : MapReturnTypeUnion<H> | D;
-    // prettier-ignore
-    transition<H extends TransitionRequestHandlers<AllowedStateKeys, StateMatrix, TransitionMatrix>>(
+    ): [AllowedStateKeys] extends [keyof H] ? SafeReturnType<H[K]> : SafeReturnType<H[keyof H]> | D;
+    transition<H extends TransitionReqHandlers<AllowedStateKeys, StateMatrix, TransitionMatrix>>(
         handlers: H,
     ): void;
     getTransitionObjForState<K extends AllowedStateKeys>(
@@ -97,7 +102,7 @@ export default function createStatefulMachine<
                 currentHandler && currentHandler(transitionObject);
             },
             fold(handlers, defaultVal) {
-                const currentHandler = handlers[this.state];
+                const currentHandler = canIndex(handlers, this.state) && handlers[this.state];
                 return currentHandler ? currentHandler(this.value) : defaultVal;
             },
             getTransitionObjForState(currentState) {

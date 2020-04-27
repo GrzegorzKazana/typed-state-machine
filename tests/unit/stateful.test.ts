@@ -1,5 +1,5 @@
-import { stateful } from '../src/index';
-import { States, transitions } from './mocks';
+import { stateful } from '@/index';
+import { States, transitions } from '../mocks';
 
 describe('when creating statefull state machine', () => {
     it('is correctly initialized', () => {
@@ -112,3 +112,4 @@ describe('when creating statefull state machine', () => {
         machine.transition({ idle: t => t.pending({ b: 2 }) });
     });
 });
+// https://github.com/dsherret/conditional-type-checks

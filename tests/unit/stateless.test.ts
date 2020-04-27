@@ -1,5 +1,5 @@
-import { stateless } from '../src/index';
-import { States, transitions } from './mocks';
+import { stateless } from '@/index';
+import { States, transitions } from '../mocks';
 
 describe('when creating stateless state machine', () => {
     const initMachine = stateless<keyof States, States, typeof transitions>(transitions);

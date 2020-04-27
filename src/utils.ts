@@ -6,11 +6,12 @@ export type PossibleTransitions<Keys extends string> = {
     [K in Keys]: readonly Keys[];
 };
 
-export type MapReturnTypeUnion<T extends Record<string, AnyFn | undefined>> = MapReturnType<
-    T
->[keyof T];
-type MapReturnType<T extends Record<string, AnyFn | undefined>> = {
-    [F in keyof T]: T[F] extends AnyFn ? ReturnType<T[F]> : undefined;
-};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type SafeReturnType<F extends any> = F extends (...args: any) => infer R ? R : undefined;
 
 export const shallowMerge = <T>(...obj: object[]): T => Object.assign({}, ...obj);
+
+export const canIndex = <T extends object, K extends string | number | symbol>(
+    obj: T,
+    prop: K,
+): obj is T & Record<K, unknown> => prop in obj;
