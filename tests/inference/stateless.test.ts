@@ -18,9 +18,7 @@ describe('type inference of stateless state machine', () => {
 
     it('infers type of argument of transition function', () => {
         const idleMachine = initMachine('idle', { a: 1 });
-        const { pending } = idleMachine;
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        assert<IsAssignable<typeof pending, (a: States['pending']) => any>>(true);
+        assert<IsAssignable<Parameters<typeof idleMachine['pending']>[0], States['pending']>>(true);
     });
 });
