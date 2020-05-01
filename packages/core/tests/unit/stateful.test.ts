@@ -15,9 +15,20 @@ describe('when creating statefull state machine', () => {
         const machine = initMachine('idle', { a: 1 });
 
         expect(machine.isInState('idle'));
-        expect(machine.canTransitionTo('pending'));
-        expect(machine.canTransitionTo('fetched')).toBeFalsy();
-        expect(machine.canTransitionTo('failed')).toBeFalsy();
+    });
+
+    it('gets current state', () => {
+        const initMachine = stateful<keyof States, States, typeof transitions>(transitions);
+        const machine = initMachine('idle', { a: 1 });
+
+        expect(machine.getOr('idle')).toEqual({ a: 1 });
+    });
+
+    it('gets default value if not in current state', () => {
+        const initMachine = stateful<keyof States, States, typeof transitions>(transitions);
+        const machine = initMachine('idle', { a: 1 });
+
+        expect(machine.getOr('pending', null)).toEqual(null);
     });
 
     it('allows folding current state', () => {

@@ -12,6 +12,22 @@ describe('type inference of stateless state machine', () => {
         assert<HasProperties<typeof machine, 'value' | 'state' | 'transition'>>(true);
     });
 
+    it('infers infers getOr return type without default', () => {
+        const initMachine = stateful<keyof States, States, typeof transitions>(transitions);
+        const machine = initMachine('idle', { a: 1 });
+        const result = machine.getOr('idle');
+
+        assert<IsExact<typeof result, States['idle'] | undefined>>(true);
+    });
+
+    it('infers infers getOr return type with default', () => {
+        const initMachine = stateful<keyof States, States, typeof transitions>(transitions);
+        const machine = initMachine('idle', { a: 1 });
+        const result = machine.getOr('idle', null);
+
+        assert<IsExact<typeof result, States['idle'] | null>>(true);
+    });
+
     it('infers folded type if exhaustive', () => {
         const initMachine = stateful<keyof States, States, typeof transitions>(transitions);
         const machine = initMachine('idle', { a: 1 });

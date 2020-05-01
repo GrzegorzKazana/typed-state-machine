@@ -1,11 +1,11 @@
-import { shallowMerge, canIndex } from './utils';
+import { canIndex, buildObjFromKeys, isValueRepresentingKey } from './utils';
 import {
     PossibleStateValues,
     PossibleTransitions,
     TransitionHandlers,
+    TransitionObject,
     StateFolders,
     SafeReturnType,
-    ArrayUnion,
 } from './types';
 
 export type StatefulMachine<
@@ -16,7 +16,8 @@ export type StatefulMachine<
     value: StateMatrix[StateKeys];
     state: StateKeys;
     isInState(stateKey: StateKeys): boolean;
-    canTransitionTo(stateKey: StateKeys): boolean;
+    getOr<K extends StateKeys>(stateKey: K): StateMatrix[K] | undefined;
+    getOr<K extends StateKeys, D>(stateKey: K, defaultVal: D): StateMatrix[K] | D;
     fold<K extends StateKeys, H extends StateFolders<K, StateMatrix>, D = null>(
         handlers: H,
         defaultVal?: D,
@@ -31,12 +32,10 @@ export type StatefulMachineInternals<
     StateMatrix extends PossibleStateValues<StateKeys>,
     TransitionMatrix extends PossibleTransitions<StateKeys>
 > = {
-    possibleTransitions: TransitionMatrix;
-    transitionHandlers: TransitionHandlers<StateKeys, StateMatrix, TransitionMatrix>;
     setState<K extends StateKeys>(stateKey: K, state: StateMatrix[K]): void;
     getTransitionObjForState<K extends StateKeys>(
         stateKey: K,
-    ): { [L in ArrayUnion<TransitionMatrix[K]>]: (newState: StateMatrix[L]) => void };
+    ): TransitionObject<StateKeys, StateMatrix, TransitionMatrix, K>;
 };
 
 export default function createStatefulMachine<
@@ -55,18 +54,18 @@ export default function createStatefulMachine<
         return {
             value: initState,
             state: initStateKey,
-            possibleTransitions: transitions,
-            transitionHandlers,
             isInState(stateKey) {
                 return this.state === stateKey;
             },
-            canTransitionTo(stateKey) {
-                return this.possibleTransitions[this.state].includes(stateKey);
+            getOr<K extends StateKeys, D>(stateKey: K, defaultVal: D | undefined = undefined) {
+                return isValueRepresentingKey(stateKey, this.state, this.value)
+                    ? this.value
+                    : defaultVal;
             },
             setState(stateKey, newState) {
                 this.value = newState;
                 this.state = stateKey;
-                const handler = this.transitionHandlers[stateKey];
+                const handler = transitionHandlers[stateKey];
                 handler && handler(this.getTransitionObjForState(stateKey), newState);
             },
             transition(handlers) {
@@ -79,12 +78,10 @@ export default function createStatefulMachine<
                 return currentHandler ? currentHandler(this.value) : defaultVal;
             },
             getTransitionObjForState(currentState) {
-                const methodObjs = this.possibleTransitions[currentState].map(newKey => ({
-                    [newKey]: (newState: StateMatrix[typeof newKey]) =>
-                        this.setState(newKey, newState),
-                }));
-
-                return shallowMerge(...methodObjs);
+                return buildObjFromKeys(
+                    transitions[currentState],
+                    key => (newState: StateMatrix[typeof key]) => this.setState(key, newState),
+                );
             },
         };
     };
