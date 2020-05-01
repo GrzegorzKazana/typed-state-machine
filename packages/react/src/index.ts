@@ -6,7 +6,7 @@ import {
     TransitionHandlers,
     StatefulMachineInternals,
 } from '@typed-state-machine/core';
-import { utils } from '@typed-state-machine/core/';
+import { utils } from '@typed-state-machine/core';
 
 import { useIsMounted } from './utils';
 
