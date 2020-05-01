@@ -17,14 +17,21 @@ describe('when using useStateMachine hook', () => {
     });
 
     it('correctly identifies its state', () => {
-        const { isInState, canTransitionTo } = renderHook(() =>
-            useStateMachine('idle', { a: 1 }),
-        ).result.current;
+        const { isInState } = renderHook(() => useStateMachine('idle', { a: 1 })).result.current;
 
         expect(isInState('idle'));
-        expect(canTransitionTo('pending'));
-        expect(canTransitionTo('fetched')).toBeFalsy();
-        expect(canTransitionTo('failed')).toBeFalsy();
+    });
+
+    it('gets current state', () => {
+        const { getOr } = renderHook(() => useStateMachine('idle', { a: 1 })).result.current;
+
+        expect(getOr('idle')).toEqual({ a: 1 });
+    });
+
+    it('gets default value if not in current state', () => {
+        const { getOr } = renderHook(() => useStateMachine('idle', { a: 1 })).result.current;
+
+        expect(getOr('pending', null)).toEqual(null);
     });
 
     it('allows folding current state', () => {

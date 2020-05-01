@@ -24,43 +24,42 @@ export default function createUseStateMachine<
     type StoredState = [StateKeys, StateMatrix[StateKeys]];
     type Machine = StatefulMachine<StateKeys, StateMatrix, TransitionMatrix> &
         StatefulMachineInternals<StateKeys, StateMatrix, TransitionMatrix>;
+    type GetTransitionObjForState = Machine['getTransitionObjForState'];
 
     return (initStateKey, initState) => {
         const isMounted = useIsMounted();
         const [[state, value], setStateAndValue] = useState<StoredState>([initStateKey, initState]);
 
-        const fold: Machine['fold'] = (handlers, defaultVal) => {
-            const handler = utils.canIndex(handlers, state) && handlers[state];
-            return handler ? handler(value) : defaultVal;
-        };
-
-        const getTransitionObjForState: Machine['getTransitionObjForState'] = currentState => {
-            const methodObjs = possibleTransitions[currentState].map(newKey => ({
-                [newKey]: (newState: StateMatrix[typeof newKey]) =>
-                    setStateAndValue([newKey, newState]),
-            }));
-
-            return utils.shallowMerge(...methodObjs);
-        };
-
-        const transition: Machine['transition'] = handlers => {
-            const transitionObject = getTransitionObjForState(state);
-            const currentHandler = handlers[state];
-            currentHandler && currentHandler(transitionObject, value);
-        };
+        const getTransitionObjForState: GetTransitionObjForState = currentState =>
+            utils.buildObjFromKeys(
+                possibleTransitions[currentState],
+                key => (newState: StateMatrix[typeof key]) => setStateAndValue([key, newState]),
+            );
 
         useEffect(() => {
             const handler = transitionHandlers[state];
-            isMounted() && handler && handler(getTransitionObjForState(state), value);
+
+            if (handler && isMounted()) {
+                const transitionObj = getTransitionObjForState(state);
+                handler(transitionObj, value);
+            }
         }, [state, value, isMounted]);
 
         return {
             value,
             state,
             isInState: stateKey => stateKey === state,
-            canTransitionTo: stateKey => possibleTransitions[state].includes(stateKey),
-            fold,
-            transition,
+            getOr: <K extends StateKeys, D>(stateKey: K, defaultVal: D | undefined = undefined) =>
+                utils.isValueRepresentingKey(stateKey, state, value) ? value : defaultVal,
+            fold: (handlers, defaultVal) => {
+                const handler = utils.canIndex(handlers, state) && handlers[state];
+                return handler ? handler(value) : defaultVal;
+            },
+            transition: handlers => {
+                const transitionObject = getTransitionObjForState(state);
+                const currentHandler = handlers[state];
+                currentHandler && currentHandler(transitionObject, value);
+            },
         };
     };
 }
