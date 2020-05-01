@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "target": "ESNext",
-        "module": "UMD",
+        "module": "ES6",
         "noImplicitAny": true,
         "strict": true,
         "strictNullChecks": true,
