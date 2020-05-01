@@ -54,7 +54,7 @@ describe('when using useStateMachine hook', () => {
 
         act(() => {
             transition({
-                idle: ({ a }, to) => to.pending({ b: a + 1 }),
+                idle: (to, { a }) => to.pending({ b: a + 1 }),
             });
         });
 
@@ -72,22 +72,22 @@ describe('when using useStateMachine hook', () => {
         const { transition } = result.current;
 
         act(() => {
-            transition({ idle: (_, to) => to.pending({ b: 2 }) });
+            transition({ idle: to => to.pending({ b: 2 }) });
         });
 
         expect(handlers.pending).toBeCalled();
         expect(handlers.pending).toBeCalledWith(
-            { b: 2 },
             {
                 fetched: expect.any(Function),
                 failed: expect.any(Function),
             },
+            { b: 2 },
         );
     });
 
     it('allows for triggering state change in handler', () => {
         const handlers = {
-            pending: jest.fn((_, to) => to.fetched({ c: 3 })),
+            pending: jest.fn(to => to.fetched({ c: 3 })),
             fetched: jest.fn(),
         };
         const hook = createUseStateMachine<keyof States, States, typeof transitions>(
@@ -98,7 +98,7 @@ describe('when using useStateMachine hook', () => {
         const { transition } = result.current;
 
         act(() => {
-            transition({ idle: (_, to) => to.pending({ b: 2 }) });
+            transition({ idle: to => to.pending({ b: 2 }) });
         });
 
         expect(handlers.fetched).toBeCalled();
@@ -108,14 +108,14 @@ describe('when using useStateMachine hook', () => {
 
     it('allows for triggering state change in handler asynchronously', done => {
         const handlers = {
-            pending: jest.fn((_, to) =>
+            pending: jest.fn(to =>
                 setTimeout(() => {
                     act(() => {
                         to.fetched({ c: 3 });
                     });
                 }, 50),
             ),
-            fetched: jest.fn(s => {
+            fetched: jest.fn((_, s) => {
                 expect(s).toEqual({ c: 3 });
                 done();
             }),
@@ -128,7 +128,7 @@ describe('when using useStateMachine hook', () => {
         const { transition } = result.current;
 
         act(() => {
-            transition({ idle: (_, to) => to.pending({ b: 2 }) });
+            transition({ idle: to => to.pending({ b: 2 }) });
         });
     });
 });

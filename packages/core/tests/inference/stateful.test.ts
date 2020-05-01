@@ -38,40 +38,40 @@ describe('type inference of stateless state machine', () => {
 
     it('correctly infers state for transition handler', () => {
         const _ = stateful<keyof States, States, typeof transitions>(transitions, {
-            idle: state => assert<IsExact<typeof state, States['idle']>>(true),
-            pending: state => assert<IsExact<typeof state, States['pending']>>(true),
-            fetched: state => assert<IsExact<typeof state, States['fetched']>>(true),
-            failed: state => assert<IsExact<typeof state, States['failed']>>(true),
+            idle: (_, state) => assert<IsExact<typeof state, States['idle']>>(true),
+            pending: (_, state) => assert<IsExact<typeof state, States['pending']>>(true),
+            fetched: (_, state) => assert<IsExact<typeof state, States['fetched']>>(true),
+            failed: (_, state) => assert<IsExact<typeof state, States['failed']>>(true),
         });
     });
 
     it('correctly infers possible transitions in transition handlers', () => {
         const _ = stateful<keyof States, States, typeof transitions>(transitions, {
-            idle: (_, t) =>
-                assert<HasProperties<typeof t, ArrayUnion<typeof transitions['idle']>>>(true),
-            pending: (_, t) =>
-                assert<HasProperties<typeof t, ArrayUnion<typeof transitions['pending']>>>(true),
-            fetched: (_, t) =>
-                assert<HasProperties<typeof t, ArrayUnion<typeof transitions['fetched']>>>(true),
-            failed: (_, t) =>
-                assert<HasProperties<typeof t, ArrayUnion<typeof transitions['failed']>>>(true),
+            idle: to =>
+                assert<HasProperties<typeof to, ArrayUnion<typeof transitions['idle']>>>(true),
+            pending: to =>
+                assert<HasProperties<typeof to, ArrayUnion<typeof transitions['pending']>>>(true),
+            fetched: to =>
+                assert<HasProperties<typeof to, ArrayUnion<typeof transitions['fetched']>>>(true),
+            failed: to =>
+                assert<HasProperties<typeof to, ArrayUnion<typeof transitions['failed']>>>(true),
         });
     });
 
     it('correctly infers statetype in transition handlers', () => {
         const _ = stateful<keyof States, States, typeof transitions>(transitions, {
-            idle: (_, t) =>
-                assert<IsExact<Parameters<typeof t['pending']>[0], States['pending']>>(true),
-            pending: (_, t) => {
-                assert<IsExact<Parameters<typeof t['fetched']>[0], States['fetched']>>(true);
-                assert<IsExact<Parameters<typeof t['failed']>[0], States['failed']>>(true);
+            idle: to =>
+                assert<IsExact<Parameters<typeof to['pending']>[0], States['pending']>>(true),
+            pending: to => {
+                assert<IsExact<Parameters<typeof to['fetched']>[0], States['fetched']>>(true);
+                assert<IsExact<Parameters<typeof to['failed']>[0], States['failed']>>(true);
             },
-            fetched: (_, t) => {
-                assert<IsExact<Parameters<typeof t['idle']>[0], States['idle']>>(true);
-                assert<IsExact<Parameters<typeof t['fetched']>[0], States['fetched']>>(true);
+            fetched: to => {
+                assert<IsExact<Parameters<typeof to['idle']>[0], States['idle']>>(true);
+                assert<IsExact<Parameters<typeof to['fetched']>[0], States['fetched']>>(true);
             },
-            failed: (_, t) =>
-                assert<IsExact<Parameters<typeof t['pending']>[0], States['pending']>>(true),
+            failed: to =>
+                assert<IsExact<Parameters<typeof to['pending']>[0], States['pending']>>(true),
         });
     });
 });

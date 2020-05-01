@@ -67,12 +67,12 @@ export default function createStatefulMachine<
                 this.value = newState;
                 this.state = stateKey;
                 const handler = this.transitionHandlers[stateKey];
-                handler && handler(newState, this.getTransitionObjForState(stateKey));
+                handler && handler(this.getTransitionObjForState(stateKey), newState);
             },
             transition(handlers) {
                 const transitionObject = this.getTransitionObjForState(this.state);
                 const currentHandler = handlers[this.state];
-                currentHandler && currentHandler(this.value, transitionObject);
+                currentHandler && currentHandler(transitionObject, this.value);
             },
             fold(handlers, defaultVal) {
                 const currentHandler = canIndex(handlers, this.state) && handlers[this.state];

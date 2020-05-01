@@ -46,12 +46,12 @@ export default function createUseStateMachine<
         const transition: Machine['transition'] = handlers => {
             const transitionObject = getTransitionObjForState(state);
             const currentHandler = handlers[state];
-            currentHandler && currentHandler(value, transitionObject);
+            currentHandler && currentHandler(transitionObject, value);
         };
 
         useEffect(() => {
             const handler = transitionHandlers[state];
-            isMounted() && handler && handler(value, getTransitionObjForState(state));
+            isMounted() && handler && handler(getTransitionObjForState(state), value);
         }, [state, value, isMounted]);
 
         return {

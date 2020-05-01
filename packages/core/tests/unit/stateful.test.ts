@@ -51,7 +51,7 @@ describe('when creating statefull state machine', () => {
         const initMachine = stateful<keyof States, States, typeof transitions>(transitions);
         const machine = initMachine('idle', { a: 1 });
 
-        machine.transition({ idle: (_, t) => t.pending({ b: 2 }) });
+        machine.transition({ idle: to => to.pending({ b: 2 }) });
 
         expect(machine.state).toBe('pending');
         expect(machine.value).toEqual({ b: 2 });
@@ -65,21 +65,21 @@ describe('when creating statefull state machine', () => {
         );
         const machine = initMachine('idle', { a: 1 });
 
-        machine.transition({ idle: (_, t) => t.pending({ b: 2 }) });
+        machine.transition({ idle: to => to.pending({ b: 2 }) });
 
         expect(handlers.pending).toBeCalled();
         expect(handlers.pending).toBeCalledWith(
-            { b: 2 },
             {
                 fetched: expect.any(Function),
                 failed: expect.any(Function),
             },
+            { b: 2 },
         );
     });
 
     it('allows for triggering state change in handler', () => {
         const handlers = {
-            pending: jest.fn((_, t) => t.fetched({ c: 3 })),
+            pending: jest.fn(to => to.fetched({ c: 3 })),
             fetched: jest.fn(),
         };
         const initMachine = stateful<keyof States, States, typeof transitions>(
@@ -88,7 +88,7 @@ describe('when creating statefull state machine', () => {
         );
         const machine = initMachine('idle', { a: 1 });
 
-        machine.transition({ idle: (_, t) => t.pending({ b: 2 }) });
+        machine.transition({ idle: to => to.pending({ b: 2 }) });
 
         expect(handlers.fetched).toBeCalled();
         expect(machine.state).toBe('fetched');
@@ -97,8 +97,8 @@ describe('when creating statefull state machine', () => {
 
     it('allows for triggering state change in handler asynchronously', done => {
         const handlers = {
-            pending: jest.fn((_, t) => setTimeout(() => t.fetched({ c: 3 }), 50)),
-            fetched: jest.fn(s => {
+            pending: jest.fn(to => setTimeout(() => to.fetched({ c: 3 }), 50)),
+            fetched: jest.fn((_, s) => {
                 expect(s).toEqual({ c: 3 });
                 done();
             }),
@@ -109,7 +109,6 @@ describe('when creating statefull state machine', () => {
         );
         const machine = initMachine('idle', { a: 1 });
 
-        machine.transition({ idle: (_, t) => t.pending({ b: 2 }) });
+        machine.transition({ idle: to => to.pending({ b: 2 }) });
     });
 });
-// https://github.com/dsherret/conditional-type-checks

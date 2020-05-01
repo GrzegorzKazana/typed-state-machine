@@ -30,7 +30,7 @@ export type TransitionHandlers<
     TransitionMatrix extends PossibleTransitions<StateKeys>
 > = {
     [K in StateKeys]?: (
-        newState: StateMatrix[K],
         transitionObj: TransitionObject<StateKeys, StateMatrix, TransitionMatrix, K>,
+        newState: StateMatrix[K],
     ) => void;
 };
