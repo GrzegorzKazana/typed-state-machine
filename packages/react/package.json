@@ -1,0 +1,32 @@
+{
+    "name": "@typed-state-machine/react",
+    "version": "1.0.0",
+    "description": "React hook bindings for typed-state-machine",
+    "keywords": [
+        "react",
+        "state",
+        "state-machine"
+    ],
+    "author": "Grzegorz Kazana <kazana.grzegorz@gmail.com>",
+    "homepage": "",
+    "license": "ISC",
+    "scripts": {
+        "test": "echo \"Error: run tests from root\" && exit 1"
+    },
+    "devDependencies": {
+        "@types/jest": "^25.2.1",
+        "@types/react": "^16.9.34",
+        "@typescript-eslint/eslint-plugin": "^2.30.0",
+        "@typescript-eslint/parser": "^2.30.0",
+        "jest": "^25.5.3",
+        "react": "^16.13.1",
+        "ts-jest": "^25.4.0",
+        "typescript": "^3.8.3"
+    },
+    "peerDependencies": {
+        "react": "^16.13.1"
+    },
+    "dependencies": {
+        "@typed-state-machine/core": "^1.0.0"
+    }
+}
