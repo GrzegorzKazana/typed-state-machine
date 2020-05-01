@@ -1,18 +1,18 @@
-import { PossibleState, PossibleTransitions } from './utils';
+import { PossibleStateValues, PossibleTransitions, ArrayUnion } from './types';
 
-export type Machine<
-    AllowedStateKeys extends string,
-    StateMatrix extends PossibleState<AllowedStateKeys>,
-    CurrentKey extends AllowedStateKeys,
-    PossibleNextKeys extends AllowedStateKeys,
-    TransitionMatrix extends PossibleTransitions<AllowedStateKeys>
+export type StatelessMachine<
+    StateKeys extends string,
+    StateMatrix extends PossibleStateValues<StateKeys>,
+    CurrentKey extends StateKeys,
+    PossibleNextKeys extends StateKeys,
+    TransitionMatrix extends PossibleTransitions<StateKeys>
 > = {
     value: StateMatrix[CurrentKey];
 } & {
-    [NextPossibleKey in TransitionMatrix[CurrentKey][number]]: (
+    [NextPossibleKey in ArrayUnion<TransitionMatrix[CurrentKey]>]: (
         nextState: StateMatrix[NextPossibleKey],
-    ) => Machine<
-        AllowedStateKeys,
+    ) => StatelessMachine<
+        StateKeys,
         StateMatrix,
         NextPossibleKey,
         PossibleNextKeys,
@@ -21,15 +21,15 @@ export type Machine<
 };
 
 export default function createMachine<
-    AllowedStateKeys extends string,
-    StateMatrix extends PossibleState<AllowedStateKeys>,
-    TransitionMatrix extends PossibleTransitions<AllowedStateKeys>
+    StateKeys extends string,
+    StateMatrix extends PossibleStateValues<StateKeys>,
+    TransitionMatrix extends PossibleTransitions<StateKeys>
 >(
     transitions: TransitionMatrix,
-): <CurrentKey extends AllowedStateKeys, PossibleNextKeys extends AllowedStateKeys>(
+): <CurrentKey extends StateKeys, PossibleNextKeys extends StateKeys>(
     initStateKey: CurrentKey,
     initState: StateMatrix[CurrentKey],
-) => Machine<AllowedStateKeys, StateMatrix, CurrentKey, PossibleNextKeys, TransitionMatrix> {
+) => StatelessMachine<StateKeys, StateMatrix, CurrentKey, PossibleNextKeys, TransitionMatrix> {
     return (initStateKey, initState) => {
         const transitionsInCurState = transitions[initStateKey];
         const transitionMathodObjs = transitionsInCurState

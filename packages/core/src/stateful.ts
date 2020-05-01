@@ -1,83 +1,49 @@
+import { shallowMerge, canIndex } from './utils';
 import {
-    PossibleState,
+    PossibleStateValues,
     PossibleTransitions,
-    shallowMerge,
-    canIndex,
+    TransitionHandlers,
+    StateFolders,
     SafeReturnType,
-} from './utils';
+    ArrayUnion,
+} from './types';
 
-type StateHandlers<
-    AllowedStateKeys extends string,
-    StateMatrix extends PossibleState<AllowedStateKeys>
+export type StatefulMachine<
+    StateKeys extends string,
+    StateMatrix extends PossibleStateValues<StateKeys>,
+    TransitionMatrix extends PossibleTransitions<StateKeys>
 > = {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [K in AllowedStateKeys]?: (state: StateMatrix[K]) => any;
-};
-
-type TransitionObject<
-    AllowedStateKeys extends string,
-    StateMatrix extends PossibleState<AllowedStateKeys>,
-    TransitionMatrix extends PossibleTransitions<AllowedStateKeys>,
-    TransitionTarget extends AllowedStateKeys
-> = { [L in TransitionMatrix[TransitionTarget][number]]: (newState: StateMatrix[L]) => void };
-
-type TransitionReqHandlers<
-    AllowedStateKeys extends string,
-    StateMatrix extends PossibleState<AllowedStateKeys>,
-    TransitionMatrix extends PossibleTransitions<AllowedStateKeys>
-> = {
-    [K in AllowedStateKeys]?: (
-        transitionObj: TransitionObject<AllowedStateKeys, StateMatrix, TransitionMatrix, K>,
-    ) => void;
-};
-
-type TransitionHandlers<
-    AllowedStateKeys extends string,
-    StateMatrix extends PossibleState<AllowedStateKeys>,
-    TransitionMatrix extends PossibleTransitions<AllowedStateKeys>
-> = {
-    [K in AllowedStateKeys]?: (
-        newState: StateMatrix[K],
-        transitionObj: TransitionObject<AllowedStateKeys, StateMatrix, TransitionMatrix, K>,
-    ) => void;
-};
-
-type StatefulMachine<
-    AllowedStateKeys extends string,
-    StateMatrix extends PossibleState<AllowedStateKeys>,
-    TransitionMatrix extends PossibleTransitions<AllowedStateKeys>
-> = {
-    value: StateMatrix[AllowedStateKeys];
-    state: AllowedStateKeys;
+    value: StateMatrix[StateKeys];
+    state: StateKeys;
     possibleTransitions: TransitionMatrix;
-    transitionHandlers: TransitionHandlers<AllowedStateKeys, StateMatrix, TransitionMatrix>;
+    transitionHandlers: TransitionHandlers<StateKeys, StateMatrix, TransitionMatrix>;
 } & {
-    isInState(stateKey: AllowedStateKeys): boolean;
-    canTransitionTo(stateKey: AllowedStateKeys): boolean;
-    setState<K extends AllowedStateKeys>(stateKey: K, state: StateMatrix[K]): void;
-    fold<K extends AllowedStateKeys, H extends StateHandlers<K, StateMatrix>, D = null>(
+    isInState(stateKey: StateKeys): boolean;
+    canTransitionTo(stateKey: StateKeys): boolean;
+    setState<K extends StateKeys>(stateKey: K, state: StateMatrix[K]): void;
+    fold<K extends StateKeys, H extends StateFolders<K, StateMatrix>, D = null>(
         handlers: H,
         defaultVal?: D,
-    ): [AllowedStateKeys] extends [keyof H] ? SafeReturnType<H[K]> : SafeReturnType<H[keyof H]> | D;
-    transition<H extends TransitionReqHandlers<AllowedStateKeys, StateMatrix, TransitionMatrix>>(
+    ): [StateKeys] extends [keyof H] ? SafeReturnType<H[K]> : SafeReturnType<H[keyof H]> | D;
+    transition<H extends TransitionHandlers<StateKeys, StateMatrix, TransitionMatrix>>(
         handlers: H,
     ): void;
-    getTransitionObjForState<K extends AllowedStateKeys>(
+    getTransitionObjForState<K extends StateKeys>(
         stateKey: K,
-    ): { [L in TransitionMatrix[K][number]]: (newState: StateMatrix[L]) => void };
+    ): { [L in ArrayUnion<TransitionMatrix[K]>]: (newState: StateMatrix[L]) => void };
 };
 
 export default function createStatefulMachine<
-    AllowedStateKeys extends string,
-    StateMatrix extends PossibleState<AllowedStateKeys>,
-    TransitionMatrix extends PossibleTransitions<AllowedStateKeys>
+    StateKeys extends string,
+    StateMatrix extends PossibleStateValues<StateKeys>,
+    TransitionMatrix extends PossibleTransitions<StateKeys>
 >(
     transitions: TransitionMatrix,
-    transitionHandlers: TransitionHandlers<AllowedStateKeys, StateMatrix, TransitionMatrix> = {},
-): <CurrentKey extends AllowedStateKeys>(
+    transitionHandlers: TransitionHandlers<StateKeys, StateMatrix, TransitionMatrix> = {},
+): <CurrentKey extends StateKeys>(
     initStateKey: CurrentKey,
     initState: StateMatrix[CurrentKey],
-) => StatefulMachine<AllowedStateKeys, StateMatrix, TransitionMatrix> {
+) => StatefulMachine<StateKeys, StateMatrix, TransitionMatrix> {
     return (initStateKey, initState) => {
         return {
             value: initState,
@@ -99,7 +65,7 @@ export default function createStatefulMachine<
             transition(handlers) {
                 const transitionObject = this.getTransitionObjForState(this.state);
                 const currentHandler = handlers[this.state];
-                currentHandler && currentHandler(transitionObject);
+                currentHandler && currentHandler(this.value, transitionObject);
             },
             fold(handlers, defaultVal) {
                 const currentHandler = canIndex(handlers, this.state) && handlers[this.state];

@@ -51,7 +51,7 @@ describe('when creating statefull state machine', () => {
         const initMachine = stateful<keyof States, States, typeof transitions>(transitions);
         const machine = initMachine('idle', { a: 1 });
 
-        machine.transition({ idle: t => t.pending({ b: 2 }) });
+        machine.transition({ idle: (_, t) => t.pending({ b: 2 }) });
 
         expect(machine.state).toBe('pending');
         expect(machine.value).toEqual({ b: 2 });
@@ -65,7 +65,7 @@ describe('when creating statefull state machine', () => {
         );
         const machine = initMachine('idle', { a: 1 });
 
-        machine.transition({ idle: t => t.pending({ b: 2 }) });
+        machine.transition({ idle: (_, t) => t.pending({ b: 2 }) });
 
         expect(handlers.pending).toBeCalled();
         expect(handlers.pending).toBeCalledWith(
@@ -88,7 +88,7 @@ describe('when creating statefull state machine', () => {
         );
         const machine = initMachine('idle', { a: 1 });
 
-        machine.transition({ idle: t => t.pending({ b: 2 }) });
+        machine.transition({ idle: (_, t) => t.pending({ b: 2 }) });
 
         expect(handlers.fetched).toBeCalled();
         expect(machine.state).toBe('fetched');
@@ -109,7 +109,7 @@ describe('when creating statefull state machine', () => {
         );
         const machine = initMachine('idle', { a: 1 });
 
-        machine.transition({ idle: t => t.pending({ b: 2 }) });
+        machine.transition({ idle: (_, t) => t.pending({ b: 2 }) });
     });
 });
 // https://github.com/dsherret/conditional-type-checks

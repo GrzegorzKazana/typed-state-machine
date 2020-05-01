@@ -1,6 +1,6 @@
 import { assert, IsExact } from 'conditional-type-checks';
 
-import { stateful } from '@/index';
+import { stateful, ArrayUnion } from '@/index';
 import { States, transitions } from '../mocks';
 import { HasProperties } from './utils';
 
@@ -48,13 +48,13 @@ describe('type inference of stateless state machine', () => {
     it('correctly infers possible transitions in transition handlers', () => {
         const _ = stateful<keyof States, States, typeof transitions>(transitions, {
             idle: (_, t) =>
-                assert<HasProperties<typeof t, typeof transitions['idle'][number]>>(true),
+                assert<HasProperties<typeof t, ArrayUnion<typeof transitions['idle']>>>(true),
             pending: (_, t) =>
-                assert<HasProperties<typeof t, typeof transitions['pending'][number]>>(true),
+                assert<HasProperties<typeof t, ArrayUnion<typeof transitions['pending']>>>(true),
             fetched: (_, t) =>
-                assert<HasProperties<typeof t, typeof transitions['fetched'][number]>>(true),
+                assert<HasProperties<typeof t, ArrayUnion<typeof transitions['fetched']>>>(true),
             failed: (_, t) =>
-                assert<HasProperties<typeof t, typeof transitions['failed'][number]>>(true),
+                assert<HasProperties<typeof t, ArrayUnion<typeof transitions['failed']>>>(true),
         });
     });
 
