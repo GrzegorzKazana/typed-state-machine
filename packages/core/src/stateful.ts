@@ -15,12 +15,8 @@ export type StatefulMachine<
 > = {
     value: StateMatrix[StateKeys];
     state: StateKeys;
-    possibleTransitions: TransitionMatrix;
-    transitionHandlers: TransitionHandlers<StateKeys, StateMatrix, TransitionMatrix>;
-} & {
     isInState(stateKey: StateKeys): boolean;
     canTransitionTo(stateKey: StateKeys): boolean;
-    setState<K extends StateKeys>(stateKey: K, state: StateMatrix[K]): void;
     fold<K extends StateKeys, H extends StateFolders<K, StateMatrix>, D = null>(
         handlers: H,
         defaultVal?: D,
@@ -28,6 +24,16 @@ export type StatefulMachine<
     transition<H extends TransitionHandlers<StateKeys, StateMatrix, TransitionMatrix>>(
         handlers: H,
     ): void;
+};
+
+export type StatefulMachineInternals<
+    StateKeys extends string,
+    StateMatrix extends PossibleStateValues<StateKeys>,
+    TransitionMatrix extends PossibleTransitions<StateKeys>
+> = {
+    possibleTransitions: TransitionMatrix;
+    transitionHandlers: TransitionHandlers<StateKeys, StateMatrix, TransitionMatrix>;
+    setState<K extends StateKeys>(stateKey: K, state: StateMatrix[K]): void;
     getTransitionObjForState<K extends StateKeys>(
         stateKey: K,
     ): { [L in ArrayUnion<TransitionMatrix[K]>]: (newState: StateMatrix[L]) => void };
@@ -43,7 +49,8 @@ export default function createStatefulMachine<
 ): <CurrentKey extends StateKeys>(
     initStateKey: CurrentKey,
     initState: StateMatrix[CurrentKey],
-) => StatefulMachine<StateKeys, StateMatrix, TransitionMatrix> {
+) => StatefulMachine<StateKeys, StateMatrix, TransitionMatrix> &
+    StatefulMachineInternals<StateKeys, StateMatrix, TransitionMatrix> {
     return (initStateKey, initState) => {
         return {
             value: initState,
