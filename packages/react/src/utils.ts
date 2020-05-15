@@ -5,6 +5,10 @@ export const useIsMounted = () => {
 
     useEffect(() => {
         mountedRef.current = true;
+
+        return () => {
+            mountedRef.current = false;
+        };
     }, []);
 
     return useCallback(() => mountedRef.current, []);
