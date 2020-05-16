@@ -1,7 +1,26 @@
 {
-    "name": "@typed-state-machine/core",
+    "name": "@GrzegorzKazana/typed-state-machine-core",
     "version": "1.0.0",
-    "description": "",
+    "description": "Typescript oriented state machine",
+    "keywords": [
+        "typescript",
+        "state",
+        "state-machine"
+    ],
+    "author": "Grzegorz Kazana <kazana.grzegorz@gmail.com>",
+    "homepage": "https://github.com/GrzegorzKazana/typed-state-machine",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/GrzegorzKazana/typed-state-machine.git",
+        "directory": "packages/core"
+    },
+    "bugs": {
+        "url": "https://github.com/GrzegorzKazana/typed-state-machine/issues"
+    },
+    "contributors": [
+        "Grzegorz Kazana <kazana.grzegorz@gmail.com>"
+    ],
+    "license": "ISC",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "scripts": {
@@ -10,9 +29,6 @@
         "format": "prettier --write src/*.ts examples/*.ts",
         "test": "jest"
     },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
     "devDependencies": {
         "@types/jest": "^25.2.1",
         "@typescript-eslint/eslint-plugin": "^2.30.0",
@@ -21,5 +37,6 @@
         "jest": "^25.4.0",
         "ts-jest": "^25.4.0",
         "typescript": "^3.8.3"
-    }
+    },
+    "dependencies": {}
 }

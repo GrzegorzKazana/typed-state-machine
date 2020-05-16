@@ -1,5 +1,5 @@
 {
-    "name": "@typed-state-machine/react",
+    "name": "@GrzegorzKazana/typed-state-machine-react",
     "version": "1.0.0",
     "description": "React hook bindings for typed-state-machine",
     "keywords": [
@@ -8,8 +8,21 @@
         "state-machine"
     ],
     "author": "Grzegorz Kazana <kazana.grzegorz@gmail.com>",
-    "homepage": "",
+    "homepage": "https://github.com/GrzegorzKazana/typed-state-machine",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/GrzegorzKazana/typed-state-machine.git",
+        "directory": "packages/react"
+    },
+    "bugs": {
+        "url": "https://github.com/GrzegorzKazana/typed-state-machine/issues"
+    },
+    "contributors": [
+        "Grzegorz Kazana <kazana.grzegorz@gmail.com>"
+    ],
     "license": "ISC",
+    "main": "dist/index.js",
+    "types": "./dist/index.d.ts",
     "scripts": {
         "build": "tsc --project tsconfig.build.json",
         "lint": "eslint src/*.ts",
@@ -33,7 +46,7 @@
         "react": "^16.13.1"
     },
     "dependencies": {
-        "@typed-state-machine/core": "^1.0.0",
+        "@GrzegorzKazana/typed-state-machine-core": "^1.0.0",
         "eslint": "^6.8.0"
     }
 }
