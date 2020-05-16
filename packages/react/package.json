@@ -1,6 +1,6 @@
 {
     "name": "@GrzegorzKazana/typed-state-machine-react",
-    "version": "0.2.0-alpha.2",
+    "version": "0.2.0-alpha.3",
     "description": "React hook bindings for typed-state-machine",
     "keywords": [
         "react",
@@ -48,7 +48,7 @@
         "react": "^16.13.1"
     },
     "dependencies": {
-        "@GrzegorzKazana/typed-state-machine-core": "^0.2.0-alpha.1",
+        "@GrzegorzKazana/typed-state-machine-core": "^0.2.0-alpha.2",
         "eslint": "^6.8.0"
     }
 }
