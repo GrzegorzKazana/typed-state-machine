@@ -1,6 +1,6 @@
 {
     "name": "@GrzegorzKazana/typed-state-machine-core",
-    "version": "0.1.0",
+    "version": "0.2.0-alpha.0",
     "description": "Typescript oriented state machine",
     "keywords": [
         "typescript",
@@ -38,6 +38,5 @@
         "jest": "^25.4.0",
         "ts-jest": "^25.4.0",
         "typescript": "^3.8.3"
-    },
-    "dependencies": {}
+    }
 }
