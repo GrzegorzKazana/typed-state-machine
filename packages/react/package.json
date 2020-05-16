@@ -8,8 +8,21 @@
         "state-machine"
     ],
     "author": "Grzegorz Kazana <kazana.grzegorz@gmail.com>",
-    "homepage": "",
+    "homepage": "https://github.com/GrzegorzKazana/typed-state-machine",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/GrzegorzKazana/typed-state-machine.git",
+        "directory": "packages/react"
+    },
+    "bugs": {
+        "url": "https://github.com/GrzegorzKazana/typed-state-machine/issues"
+    },
+    "contributors": [
+        "Grzegorz Kazana <kazana.grzegorz@gmail.com>"
+    ],
     "license": "ISC",
+    "main": "dist/index.js",
+    "types": "./dist/index.d.ts",
     "scripts": {
         "build": "tsc --project tsconfig.build.json",
         "lint": "eslint src/*.ts",
