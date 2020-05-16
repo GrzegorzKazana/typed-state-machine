@@ -5,8 +5,8 @@ import {
     PossibleTransitions,
     TransitionHandlers,
     StatefulMachineInternals,
-} from '@GrzegorzKazana/typed-state-machine-core';
-import { utils } from '@GrzegorzKazana/typed-state-machine-core';
+} from '@grzegorzkazana/typed-state-machine-core';
+import { utils } from '@grzegorzkazana/typed-state-machine-core';
 
 import { useIsMounted } from './utils';
 
