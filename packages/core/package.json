@@ -1,5 +1,5 @@
 {
-    "name": "@GrzegorzKazana/typed-state-machine-core",
+    "name": "@grzegorzkazana/typed-state-machine-core",
     "version": "0.2.0-alpha.2",
     "description": "Typescript oriented state machine",
     "keywords": [
