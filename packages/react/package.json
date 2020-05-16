@@ -27,7 +27,8 @@
         "build": "tsc --project tsconfig.build.json",
         "lint": "eslint src/*.ts",
         "format": "prettier --write src/*.ts",
-        "test": "jest"
+        "test": "jest",
+        "prepublishOnly": "npm run build"
     },
     "devDependencies": {
         "@testing-library/react-hooks": "^3.2.1",
