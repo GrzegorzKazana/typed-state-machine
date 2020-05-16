@@ -6,7 +6,7 @@
         "strict": true,
         "strictNullChecks": true,
         "declaration": true,
-        "outDir": "./dist",
+        "outDir": "./esm",
         "sourceMap": true,
         "baseUrl": ".",
         "esModuleInterop": true,
