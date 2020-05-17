@@ -13,7 +13,8 @@
         "paths": {
             "@/*": ["src/*"]
         },
-        "moduleResolution": "node"
+        "moduleResolution": "node",
+        "jsx": "preserve"
     },
     "include": ["src/**/*", "examples/**/*", "tests/**/*"],
     "exclude": ["node_modules", "tsconfig.json"]
