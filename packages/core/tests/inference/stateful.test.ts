@@ -52,6 +52,32 @@ describe('type inference of stateless state machine', () => {
         assert<IsExact<typeof result, number | string | null>>(true);
     });
 
+    it('correctly infers parameters if state folder', () => {
+        const initMachine = stateful<keyof States, States, typeof transitions>(transitions);
+        const machine = initMachine('idle', { a: 1 });
+
+        machine.fold({
+            idle: (state, to) => {
+                assert<IsExact<typeof state, States['idle']>>(true);
+                assert<IsExact<Parameters<typeof to['pending']>[0], States['pending']>>(true);
+            },
+            pending: (state, to) => {
+                assert<IsExact<typeof state, States['pending']>>(true);
+                assert<IsExact<Parameters<typeof to['fetched']>[0], States['fetched']>>(true);
+                assert<IsExact<Parameters<typeof to['failed']>[0], States['failed']>>(true);
+            },
+            fetched: (state, to) => {
+                assert<IsExact<typeof state, States['fetched']>>(true);
+                assert<IsExact<Parameters<typeof to['idle']>[0], States['idle']>>(true);
+                assert<IsExact<Parameters<typeof to['fetched']>[0], States['fetched']>>(true);
+            },
+            failed: (state, to) => {
+                assert<IsExact<typeof state, States['failed']>>(true);
+                assert<IsExact<Parameters<typeof to['pending']>[0], States['pending']>>(true);
+            },
+        });
+    });
+
     it('correctly infers state for transition handler', () => {
         const _ = stateful<keyof States, States, typeof transitions>(transitions, {
             idle: (_, state) => assert<IsExact<typeof state, States['idle']>>(true),
