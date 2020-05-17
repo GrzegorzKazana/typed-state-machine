@@ -53,7 +53,7 @@ export default function createUseStateMachine<
                 utils.isValueRepresentingKey(stateKey, state, value) ? value : defaultVal,
             fold: (handlers, defaultVal) => {
                 const handler = utils.canIndex(handlers, state) && handlers[state];
-                return handler ? handler(value) : defaultVal;
+                return handler ? handler(value, getTransitionObjForState(state)) : defaultVal;
             },
             transition: handlers => {
                 const transitionObject = getTransitionObjForState(state);
