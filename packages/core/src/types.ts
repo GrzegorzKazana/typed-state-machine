@@ -12,9 +12,12 @@ export type PossibleTransitions<Keys extends string> = {
 
 export type StateFolders<
     StateKeys extends string,
-    StateMatrix extends PossibleStateValues<StateKeys>
+    StateMatrix extends PossibleStateValues<StateKeys>,
+    TransitionMatrix extends PossibleTransitions<StateKeys>
 > = {
-    [K in StateKeys]?: FnAnyReturn<[StateMatrix[K]]>;
+    [K in StateKeys]?: FnAnyReturn<
+        [StateMatrix[K], TransitionObject<StateKeys, StateMatrix, TransitionMatrix, K>]
+    >;
 };
 
 export type TransitionObject<

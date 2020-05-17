@@ -4,7 +4,7 @@
     "scripts": {
         "init": "lerna bootstrap --hoist && lerna run build",
         "test": "lerna run --stream test",
-        "publish": "lerna publish --message \"%v\""
+        "publish": "lerna publish --message \"chore(release): publish\""
     },
     "devDependencies": {
         "eslint": "^6.8.0",

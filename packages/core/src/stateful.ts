@@ -18,7 +18,7 @@ export type StatefulMachine<
     isInState(stateKey: StateKeys): boolean;
     getOr<K extends StateKeys>(stateKey: K): StateMatrix[K] | undefined;
     getOr<K extends StateKeys, D>(stateKey: K, defaultVal: D): StateMatrix[K] | D;
-    fold<K extends StateKeys, H extends StateFolders<K, StateMatrix>, D = null>(
+    fold<K extends StateKeys, H extends StateFolders<K, StateMatrix, TransitionMatrix>, D = null>(
         handlers: H,
         defaultVal?: D,
     ): [StateKeys] extends [keyof H] ? SafeReturnType<H[K]> : SafeReturnType<H[keyof H]> | D;
@@ -75,7 +75,9 @@ export default function createStatefulMachine<
             },
             fold(handlers, defaultVal) {
                 const currentHandler = canIndex(handlers, this.state) && handlers[this.state];
-                return currentHandler ? currentHandler(this.value) : defaultVal;
+                return currentHandler
+                    ? currentHandler(this.value, this.getTransitionObjForState(this.state))
+                    : defaultVal;
             },
             getTransitionObjForState(currentState) {
                 return buildObjFromKeys(

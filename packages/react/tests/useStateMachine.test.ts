@@ -55,6 +55,41 @@ describe('when using useStateMachine hook', () => {
         expect(result).toBe(2);
     });
 
+    it('allows triggering transition from fold', () => {
+        const { result } = renderHook(() => useStateMachine('idle', { a: 1 }));
+        const { fold } = result.current;
+
+        act(() => {
+            fold({
+                idle: ({ a }, to) => {
+                    to.pending({ b: a + 1 });
+                    return a * 5;
+                },
+            });
+        });
+
+        expect(result.current.state).toBe('pending');
+    });
+
+    it('allows triggering async transition from fold', done => {
+        const handlers = { pending: () => done() };
+        const hook = createUseStateMachine<keyof States, States, typeof transitions>(
+            transitions,
+            handlers,
+        );
+        const { result } = renderHook(() => hook('idle', { a: 1 }));
+        const { fold } = result.current;
+
+        act(() => {
+            fold({
+                idle: ({ a }, to) => {
+                    setTimeout(() => act(() => to.pending({ b: a + 1 })), 100);
+                    return a * 5;
+                },
+            });
+        });
+    });
+
     it('allows for transitioning to another state', () => {
         const { result } = renderHook(() => useStateMachine('idle', { a: 1 }));
         const { transition } = result.current;

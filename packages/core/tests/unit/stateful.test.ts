@@ -58,6 +58,37 @@ describe('when creating statefull state machine', () => {
         expect(result).toBe(2);
     });
 
+    it('allows for triggering transition from fold', () => {
+        const initMachine = stateful<keyof States, States, typeof transitions>(transitions);
+        const machine = initMachine('idle', { a: 1 });
+
+        const result = machine.fold({
+            idle: ({ a }, to) => {
+                to.pending({ b: a + 1 });
+                return a * 5;
+            },
+        });
+
+        expect(result).toEqual(5);
+        expect(machine.state).toEqual('pending');
+    });
+
+    it('allows for triggering async transition from fold', done => {
+        const initMachine = stateful<keyof States, States, typeof transitions>(transitions, {
+            pending: () => done(),
+        });
+        const machine = initMachine('idle', { a: 1 });
+
+        const result = machine.fold({
+            idle: ({ a }, to) => {
+                setTimeout(() => to.pending({ b: a + 1 }), 100);
+                return a * 5;
+            },
+        });
+
+        expect(result).toEqual(5);
+    });
+
     it('enables transition to other state', () => {
         const initMachine = stateful<keyof States, States, typeof transitions>(transitions);
         const machine = initMachine('idle', { a: 1 });
