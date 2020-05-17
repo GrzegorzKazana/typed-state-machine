@@ -2,8 +2,9 @@
     "name": "typed-state-machine",
     "private": true,
     "scripts": {
-        "init": "lerna bootstrap && lerna run build",
-        "test": "lerna run --stream test"
+        "init": "lerna bootstrap --hoist && lerna run build",
+        "test": "lerna run --stream test",
+        "publish": "lerna publish --message \"%v\""
     },
     "devDependencies": {
         "eslint": "^6.8.0",

@@ -48,7 +48,6 @@
         "react": "^16.13.1"
     },
     "dependencies": {
-        "@grzegorzkazana/typed-state-machine-core": "^0.2.0-alpha.3",
-        "eslint": "^6.8.0"
+        "@grzegorzkazana/typed-state-machine-core": "^0.2.0-alpha.3"
     }
 }
