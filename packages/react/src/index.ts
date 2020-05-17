@@ -10,6 +10,7 @@ import { utils } from '@grzegorzkazana/typed-state-machine-core';
 
 import { useIsMounted } from './utils';
 
+export { StatefulMachine, PossibleStateValues, PossibleTransitions, TransitionHandlers };
 export default function createUseStateMachine<
     StateKeys extends string,
     StateMatrix extends PossibleStateValues<StateKeys>,
