@@ -1,6 +1,6 @@
 {
     "name": "@grzegorzkazana/typed-state-machine-react",
-    "version": "0.2.0-alpha.7",
+    "version": "0.2.0-alpha.8",
     "description": "React hook bindings for typed-state-machine",
     "keywords": [
         "react",
