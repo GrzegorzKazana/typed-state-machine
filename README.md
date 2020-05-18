@@ -20,7 +20,6 @@ npm install @grzegorzkazana/typed-state-machine-react --registry https://npm.pkg
 Matrix of states defines shape of data in each state.
 
 ```typescript
-//Example representing states of ES6 Promise used for fetching data.
 type States = {
     pending: {};
     fulfilled: { data: Response };
@@ -48,7 +47,7 @@ Callbacks called after transition to given state.
 const handlers = {
     fulfilled: (to, state) => console.log(`Fetched: ${state.data}`),
     rejected: (to, state) => console.log(`Failed: ${state.err}`),
-} as const;
+};
 ```
 
 Callbacks may also trigger subsequent sync or async transitions using `to` object. `to` is fully typed and has defined properties of coresponding possible state changes in state under current key. It accepts next state value based on State Matrix.
@@ -56,16 +55,12 @@ Callbacks may also trigger subsequent sync or async transitions using `to` objec
 ```typescript
 const handlers = {
     pending: to =>
-        setTimeout(
-            () =>
-                to.fulfilled({
-                    data: {
-                        /* ... */
-                    },
-                }),
-            1000,
-        ),
-} as const;
+        // e.g. trigger side effect that will cause next transition
+        httpService
+            .get(/* ... */)
+            .then(data => to.fulfilled({ data }))
+            .catch(err => to.rejected({ err })),
+};
 ```
 
 ## Interacting with state machine
@@ -82,7 +77,7 @@ const machine = initMachine('pending', {});
 ```typescript
 machine.isInState(stateKey: StateKeys): boolean
 
-machine.isInState('pending')    // true
+machine.isInState('pending')    // boolean
 ```
 
 ### Reading current state
@@ -91,7 +86,8 @@ machine.isInState('pending')    // true
 machine.getOr<K extends StateKeys, D>(stateKey: K, defaultVal: D | undefined = undefined)
 
 machine.getOr('fulfilled')      // { data: Response } | undefined
-machine.getOr('fulfilled', 42)  // { data: Response } | number
+machine.getOr('rejected')       // { err: Error } | undefined
+machine.getOr('rejected', 42)   // { err: Error } | number
 ```
 
 ### Folding state
@@ -122,7 +118,7 @@ machine.transition<H extends TransitionHandlers<StateKeys, StateMatrix, Transiti
 ): void;
 
 machine.transition({
-    // if current state is 'pending' go to 'fulfilled'
+    // if current state is 'pending' go to 'fulfilled' state
     pending: to => to.fulfilled({ data: { /* ... */ } }),
 })
 ```
