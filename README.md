@@ -1,6 +1,6 @@
 # Typed-state-machine
 
-Definietly typed finite state machine for managing state in your apps.
+Tiny (~0.6/0.8kB) strongly typed finite state machine for managing state in your apps.
 For react hook bindings see [@typed-state-machine/react](https://github.com/GrzegorzKazana/typed-state-machine/tree/master/packages/react).
 
 ## Installation
