@@ -63,6 +63,13 @@ const handlers = {
 };
 ```
 
+```typescript
+const handlers = {
+    // ts error - transition from fulfilled to rejected is not allowed
+    fulfilled: to => to.rejected(/* ... */),
+};
+```
+
 ## Interacting with state machine
 
 ### Instantiation
